@@ -1,15 +1,30 @@
 import 'package:flutter/material.dart';
+import '../services/customer_service.dart';
 import '../theme/app_theme.dart';
+import 'customer_list_screen.dart';
 import 'login_screen.dart';
 
-class HomeScreen extends StatelessWidget {
+class HomeScreen extends StatefulWidget {
   const HomeScreen({super.key});
 
+  @override
+  State<HomeScreen> createState() => _HomeScreenState();
+}
+
+class _HomeScreenState extends State<HomeScreen> {
   void _logout(BuildContext context) {
     Navigator.of(context).pushAndRemoveUntil(
       MaterialPageRoute(builder: (_) => const LoginScreen()),
           (route) => false,
     );
+  }
+
+  Future<void> _openCustomers() async {
+    await Navigator.of(context).push(
+      MaterialPageRoute(builder: (_) => const CustomerListScreen()),
+    );
+    // Refresh stats (e.g. customer count) after returning.
+    if (mounted) setState(() {});
   }
 
   @override
@@ -90,7 +105,12 @@ class HomeScreen extends StatelessWidget {
       _StatItem('Today\'s Sales', 'Rs. 0.00', Icons.trending_up, AppColors.accent),
       _StatItem('Orders', '0', Icons.receipt_long, AppColors.primary),
       _StatItem('Products', '0', Icons.inventory_2_outlined, Colors.orange),
-      _StatItem('Customers', '0', Icons.people_outline, Colors.purple),
+      _StatItem(
+        'Customers',
+        '${CustomerService.instance.customers.length}',
+        Icons.people_outline,
+        Colors.purple,
+      ),
     ];
 
     return GridView.builder(
@@ -149,10 +169,10 @@ class HomeScreen extends StatelessWidget {
 
   Widget _buildQuickActions(BuildContext context) {
     final actions = [
-      _ActionItem('New Sale', Icons.point_of_sale_rounded, AppColors.primary),
-      _ActionItem('Products', Icons.inventory_2_outlined, Colors.orange),
-      _ActionItem('Orders', Icons.receipt_long, AppColors.accent),
-      _ActionItem('Reports', Icons.bar_chart_rounded, Colors.purple),
+      _ActionItem('New Sale', Icons.point_of_sale_rounded, AppColors.primary, null),
+      _ActionItem('Products', Icons.inventory_2_outlined, Colors.orange, null),
+      _ActionItem('Customers', Icons.people_outline, Colors.purple, _openCustomers),
+      _ActionItem('Reports', Icons.bar_chart_rounded, AppColors.accent, null),
     ];
 
     return GridView.builder(
@@ -169,11 +189,12 @@ class HomeScreen extends StatelessWidget {
         final action = actions[index];
         return InkWell(
           borderRadius: BorderRadius.circular(14),
-          onTap: () {
-            ScaffoldMessenger.of(context).showSnackBar(
-              SnackBar(content: Text('${action.label} coming soon')),
-            );
-          },
+          onTap: action.onTap ??
+                  () {
+                ScaffoldMessenger.of(context).showSnackBar(
+                  SnackBar(content: Text('${action.label} coming soon')),
+                );
+              },
           child: Container(
             padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 14),
             decoration: BoxDecoration(
@@ -224,6 +245,7 @@ class _ActionItem {
   final String label;
   final IconData icon;
   final Color color;
+  final VoidCallback? onTap;
 
-  _ActionItem(this.label, this.icon, this.color);
+  _ActionItem(this.label, this.icon, this.color, this.onTap);
 }
