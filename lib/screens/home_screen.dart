@@ -1,7 +1,9 @@
 import 'package:flutter/material.dart';
+import 'package:ma/screens/supplier/supplier_list_screen.dart';
 import '../services/customer_service.dart';
 import '../theme/app_theme.dart';
-import 'customer_list_screen.dart';
+import 'category/category_list_screen.dart';
+import 'customer/customer_list_screen.dart';
 import 'login_screen.dart';
 
 class HomeScreen extends StatefulWidget {
@@ -24,6 +26,20 @@ class _HomeScreenState extends State<HomeScreen> {
       MaterialPageRoute(builder: (_) => const CustomerListScreen()),
     );
     // Refresh stats (e.g. customer count) after returning.
+    if (mounted) setState(() {});
+  }
+
+  Future<void> _openCategories() async {
+    await Navigator.of(context).push(
+      MaterialPageRoute(builder: (_) => const CategoryListScreen()),
+    );
+    if (mounted) setState(() {});
+  }
+
+  Future<void> _openSuppliers() async {
+    await Navigator.of(context).push(
+      MaterialPageRoute(builder: (_) => const SupplierListScreen()),
+    );
     if (mounted) setState(() {});
   }
 
@@ -80,7 +96,7 @@ class _HomeScreenState extends State<HomeScreen> {
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
           Text(
-            'Welcome back 👋',
+            'Welcome back',
             style: TextStyle(
               color: Colors.white,
               fontSize: 14,
@@ -117,11 +133,16 @@ class _HomeScreenState extends State<HomeScreen> {
       shrinkWrap: true,
       physics: const NeverScrollableScrollPhysics(),
       itemCount: stats.length,
+      // Fixed pixel height per row instead of childAspectRatio.
+      // childAspectRatio derives height from the available width, so on
+      // narrower screens or with larger system font scale the fixed-size
+      // content (icon + value + label) no longer fits -> bottom overflow.
+      // mainAxisExtent gives a deterministic height that always fits.
       gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
         crossAxisCount: 2,
         crossAxisSpacing: 14,
         mainAxisSpacing: 14,
-        childAspectRatio: 1.5,
+        mainAxisExtent: 120,
       ),
       itemBuilder: (context, index) {
         final stat = stats[index];
@@ -134,6 +155,7 @@ class _HomeScreenState extends State<HomeScreen> {
           ),
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.start,
+            mainAxisAlignment: MainAxisAlignment.spaceBetween,
             children: [
               Container(
                 padding: const EdgeInsets.all(8),
@@ -143,18 +165,20 @@ class _HomeScreenState extends State<HomeScreen> {
                 ),
                 child: Icon(stat.icon, color: stat.color, size: 20),
               ),
-              const Spacer(),
               Text(
                 stat.value,
+                maxLines: 1,
+                overflow: TextOverflow.ellipsis,
                 style: const TextStyle(
                   fontSize: 18,
                   fontWeight: FontWeight.bold,
                   color: AppColors.textPrimary,
                 ),
               ),
-              const SizedBox(height: 2),
               Text(
                 stat.label,
+                maxLines: 1,
+                overflow: TextOverflow.ellipsis,
                 style: const TextStyle(
                   fontSize: 12,
                   color: AppColors.textSecondary,
@@ -172,18 +196,21 @@ class _HomeScreenState extends State<HomeScreen> {
       _ActionItem('New Sale', Icons.point_of_sale_rounded, AppColors.primary, null),
       _ActionItem('Products', Icons.inventory_2_outlined, Colors.orange, null),
       _ActionItem('Customers', Icons.people_outline, Colors.purple, _openCustomers),
-      _ActionItem('Reports', Icons.bar_chart_rounded, AppColors.accent, null),
+      _ActionItem('Categories', Icons.category_outlined, Colors.teal, _openCategories),
+      _ActionItem('Suppliers', Icons.local_shipping_outlined, AppColors.accent, _openSuppliers),
+      _ActionItem('Reports', Icons.bar_chart_rounded, Colors.indigo, null),
     ];
 
     return GridView.builder(
       shrinkWrap: true,
       physics: const NeverScrollableScrollPhysics(),
       itemCount: actions.length,
+      // Same fix: fixed row height instead of an aspect ratio.
       gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
         crossAxisCount: 2,
         crossAxisSpacing: 14,
         mainAxisSpacing: 14,
-        childAspectRatio: 2.2,
+        mainAxisExtent: 68,
       ),
       itemBuilder: (context, index) {
         final action = actions[index];
@@ -216,6 +243,8 @@ class _HomeScreenState extends State<HomeScreen> {
                 Expanded(
                   child: Text(
                     action.label,
+                    maxLines: 1,
+                    overflow: TextOverflow.ellipsis,
                     style: const TextStyle(
                       fontSize: 14,
                       fontWeight: FontWeight.w600,

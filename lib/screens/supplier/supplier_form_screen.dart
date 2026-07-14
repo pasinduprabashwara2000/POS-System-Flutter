@@ -1,24 +1,25 @@
 import 'package:flutter/material.dart';
-import '../models/customer.dart';
-import '../services/customer_service.dart';
-import '../theme/app_theme.dart';
+import '/../models/supplier.dart';
+import '/../services/supplier_service.dart';
+import '/../theme/app_theme.dart';
 
-/// Single form used for both creating a new customer and editing an
-/// existing one. Pass [customer] to edit; leave it null to create.
-class CustomerFormScreen extends StatefulWidget {
-  final Customer? customer;
+/// Single form used for both creating a new supplier and editing an
+/// existing one. Pass [supplier] to edit; leave it null to create.
+class SupplierFormScreen extends StatefulWidget {
+  final Supplier? supplier;
 
-  const CustomerFormScreen({super.key, this.customer});
+  const SupplierFormScreen({super.key, this.supplier});
 
-  bool get isEditing => customer != null;
+  bool get isEditing => supplier != null;
 
   @override
-  State<CustomerFormScreen> createState() => _CustomerFormScreenState();
+  State<SupplierFormScreen> createState() => _SupplierFormScreenState();
 }
 
-class _CustomerFormScreenState extends State<CustomerFormScreen> {
+class _SupplierFormScreenState extends State<SupplierFormScreen> {
   final _formKey = GlobalKey<FormState>();
   late final TextEditingController _nameController;
+  late final TextEditingController _contactPersonController;
   late final TextEditingController _phoneController;
   late final TextEditingController _emailController;
   late final TextEditingController _addressController;
@@ -28,16 +29,18 @@ class _CustomerFormScreenState extends State<CustomerFormScreen> {
   @override
   void initState() {
     super.initState();
-    final c = widget.customer;
-    _nameController = TextEditingController(text: c?.name ?? '');
-    _phoneController = TextEditingController(text: c?.phone ?? '');
-    _emailController = TextEditingController(text: c?.email ?? '');
-    _addressController = TextEditingController(text: c?.address ?? '');
+    final s = widget.supplier;
+    _nameController = TextEditingController(text: s?.name ?? '');
+    _contactPersonController = TextEditingController(text: s?.contactPerson ?? '');
+    _phoneController = TextEditingController(text: s?.phone ?? '');
+    _emailController = TextEditingController(text: s?.email ?? '');
+    _addressController = TextEditingController(text: s?.address ?? '');
   }
 
   @override
   void dispose() {
     _nameController.dispose();
+    _contactPersonController.dispose();
     _phoneController.dispose();
     _emailController.dispose();
     _addressController.dispose();
@@ -49,19 +52,21 @@ class _CustomerFormScreenState extends State<CustomerFormScreen> {
 
     setState(() => _isSaving = true);
 
-    final service = CustomerService.instance;
+    final service = SupplierService.instance;
 
     if (widget.isEditing) {
-      service.updateCustomer(
-        widget.customer!.id,
+      service.updateSupplier(
+        widget.supplier!.id,
         name: _nameController.text,
+        contactPerson: _contactPersonController.text,
         phone: _phoneController.text,
         email: _emailController.text,
         address: _addressController.text,
       );
     } else {
-      service.addCustomer(
+      service.addSupplier(
         name: _nameController.text,
+        contactPerson: _contactPersonController.text,
         phone: _phoneController.text,
         email: _emailController.text,
         address: _addressController.text,
@@ -75,7 +80,7 @@ class _CustomerFormScreenState extends State<CustomerFormScreen> {
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        title: Text(widget.isEditing ? 'Edit Customer' : 'Add Customer'),
+        title: Text(widget.isEditing ? 'Edit Supplier' : 'Add Supplier'),
       ),
       body: SafeArea(
         child: SingleChildScrollView(
@@ -89,15 +94,24 @@ class _CustomerFormScreenState extends State<CustomerFormScreen> {
                   controller: _nameController,
                   textCapitalization: TextCapitalization.words,
                   decoration: const InputDecoration(
-                    labelText: 'Full Name *',
-                    prefixIcon: Icon(Icons.person_outline),
+                    labelText: 'Supplier / Company Name *',
+                    prefixIcon: Icon(Icons.local_shipping_outlined),
                   ),
                   validator: (value) {
                     if (value == null || value.trim().isEmpty) {
-                      return 'Please enter customer name';
+                      return 'Please enter supplier name';
                     }
                     return null;
                   },
+                ),
+                const SizedBox(height: 16),
+                TextFormField(
+                  controller: _contactPersonController,
+                  textCapitalization: TextCapitalization.words,
+                  decoration: const InputDecoration(
+                    labelText: 'Contact Person',
+                    prefixIcon: Icon(Icons.person_outline),
+                  ),
                 ),
                 const SizedBox(height: 16),
                 TextFormField(
@@ -147,7 +161,7 @@ class _CustomerFormScreenState extends State<CustomerFormScreen> {
                       color: Colors.white,
                     ),
                   )
-                      : Text(widget.isEditing ? 'Update Customer' : 'Save Customer'),
+                      : Text(widget.isEditing ? 'Update Supplier' : 'Save Supplier'),
                 ),
                 if (widget.isEditing) ...[
                   const SizedBox(height: 12),
@@ -155,7 +169,7 @@ class _CustomerFormScreenState extends State<CustomerFormScreen> {
                     onPressed: () => _confirmDelete(context),
                     icon: const Icon(Icons.delete_outline, color: AppColors.error),
                     label: const Text(
-                      'Delete Customer',
+                      'Delete Supplier',
                       style: TextStyle(color: AppColors.error),
                     ),
                     style: OutlinedButton.styleFrom(
@@ -179,9 +193,9 @@ class _CustomerFormScreenState extends State<CustomerFormScreen> {
     showDialog(
       context: context,
       builder: (dialogContext) => AlertDialog(
-        title: const Text('Delete Customer'),
+        title: const Text('Delete Supplier'),
         content: Text(
-          'Are you sure you want to delete "${widget.customer!.name}"? This cannot be undone.',
+          'Are you sure you want to delete "${widget.supplier!.name}"? This cannot be undone.',
         ),
         actions: [
           TextButton(
@@ -190,7 +204,7 @@ class _CustomerFormScreenState extends State<CustomerFormScreen> {
           ),
           TextButton(
             onPressed: () {
-              CustomerService.instance.deleteCustomer(widget.customer!.id);
+              SupplierService.instance.deleteSupplier(widget.supplier!.id);
               Navigator.of(dialogContext).pop();
               Navigator.of(context).pop(true);
             },

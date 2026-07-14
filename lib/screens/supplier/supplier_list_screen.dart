@@ -1,20 +1,20 @@
 import 'package:flutter/material.dart';
-import '../models/customer.dart';
-import '../services/customer_service.dart';
-import '../theme/app_theme.dart';
-import 'customer_form_screen.dart';
+import '/../models/supplier.dart';
+import '/../services/supplier_service.dart';
+import '/../theme/app_theme.dart';
+import 'supplier_form_screen.dart';
 
-class CustomerListScreen extends StatefulWidget {
-  const CustomerListScreen({super.key});
+class SupplierListScreen extends StatefulWidget {
+  const SupplierListScreen({super.key});
 
   @override
-  State<CustomerListScreen> createState() => _CustomerListScreenState();
+  State<SupplierListScreen> createState() => _SupplierListScreenState();
 }
 
-class _CustomerListScreenState extends State<CustomerListScreen> {
-  final CustomerService _service = CustomerService.instance;
+class _SupplierListScreenState extends State<SupplierListScreen> {
+  final SupplierService _service = SupplierService.instance;
   final TextEditingController _searchController = TextEditingController();
-  List<Customer> _customers = [];
+  List<Supplier> _suppliers = [];
 
   @override
   void initState() {
@@ -32,25 +32,23 @@ class _CustomerListScreenState extends State<CustomerListScreen> {
 
   void _refresh() {
     setState(() {
-      _customers = _service.search(_searchController.text);
+      _suppliers = _service.search(_searchController.text);
     });
   }
 
-  Future<void> _openForm({Customer? customer}) async {
+  Future<void> _openForm({Supplier? supplier}) async {
     await Navigator.of(context).push(
-      MaterialPageRoute(
-        builder: (_) => CustomerFormScreen(customer: customer),
-      ),
+      MaterialPageRoute(builder: (_) => SupplierFormScreen(supplier: supplier)),
     );
     _refresh();
   }
 
-  void _confirmDelete(Customer customer) {
+  void _confirmDelete(Supplier supplier) {
     showDialog(
       context: context,
       builder: (dialogContext) => AlertDialog(
-        title: const Text('Delete Customer'),
-        content: Text('Are you sure you want to delete "${customer.name}"?'),
+        title: const Text('Delete Supplier'),
+        content: Text('Are you sure you want to delete "${supplier.name}"?'),
         actions: [
           TextButton(
             onPressed: () => Navigator.of(dialogContext).pop(),
@@ -58,10 +56,10 @@ class _CustomerListScreenState extends State<CustomerListScreen> {
           ),
           TextButton(
             onPressed: () {
-              _service.deleteCustomer(customer.id);
+              _service.deleteSupplier(supplier.id);
               Navigator.of(dialogContext).pop();
               ScaffoldMessenger.of(context).showSnackBar(
-                SnackBar(content: Text('${customer.name} deleted')),
+                SnackBar(content: Text('${supplier.name} deleted')),
               );
             },
             child: const Text('Delete', style: TextStyle(color: AppColors.error)),
@@ -75,7 +73,7 @@ class _CustomerListScreenState extends State<CustomerListScreen> {
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        title: const Text('Customers'),
+        title: const Text('Suppliers'),
       ),
       body: SafeArea(
         child: Column(
@@ -86,7 +84,7 @@ class _CustomerListScreenState extends State<CustomerListScreen> {
                 controller: _searchController,
                 onChanged: (_) => _refresh(),
                 decoration: InputDecoration(
-                  hintText: 'Search by name, phone, or email',
+                  hintText: 'Search by name, contact, phone, or email',
                   prefixIcon: const Icon(Icons.search),
                   suffixIcon: _searchController.text.isEmpty
                       ? null
@@ -101,18 +99,18 @@ class _CustomerListScreenState extends State<CustomerListScreen> {
               ),
             ),
             Expanded(
-              child: _customers.isEmpty
+              child: _suppliers.isEmpty
                   ? _buildEmptyState()
                   : ListView.separated(
                 padding: const EdgeInsets.fromLTRB(16, 4, 16, 90),
-                itemCount: _customers.length,
+                itemCount: _suppliers.length,
                 separatorBuilder: (_, __) => const SizedBox(height: 10),
                 itemBuilder: (context, index) {
-                  final customer = _customers[index];
-                  return _CustomerTile(
-                    customer: customer,
-                    onTap: () => _openForm(customer: customer),
-                    onDelete: () => _confirmDelete(customer),
+                  final supplier = _suppliers[index];
+                  return _SupplierTile(
+                    supplier: supplier,
+                    onTap: () => _openForm(supplier: supplier),
+                    onDelete: () => _confirmDelete(supplier),
                   );
                 },
               ),
@@ -122,8 +120,8 @@ class _CustomerListScreenState extends State<CustomerListScreen> {
       ),
       floatingActionButton: FloatingActionButton.extended(
         onPressed: () => _openForm(),
-        icon: const Icon(Icons.person_add_alt_1),
-        label: const Text('Add Customer'),
+        icon: const Icon(Icons.add_business_outlined),
+        label: const Text('Add Supplier'),
       ),
     );
   }
@@ -137,20 +135,20 @@ class _CustomerListScreenState extends State<CustomerListScreen> {
           mainAxisSize: MainAxisSize.min,
           children: [
             Icon(
-              hasQuery ? Icons.search_off : Icons.people_outline,
+              hasQuery ? Icons.search_off : Icons.local_shipping_outlined,
               size: 56,
               color: AppColors.textSecondary,
             ),
             const SizedBox(height: 12),
             Text(
-              hasQuery ? 'No customers match your search' : 'No customers yet',
+              hasQuery ? 'No suppliers match your search' : 'No suppliers yet',
               style: const TextStyle(color: AppColors.textSecondary, fontSize: 15),
               textAlign: TextAlign.center,
             ),
             if (!hasQuery) ...[
               const SizedBox(height: 4),
               const Text(
-                'Tap "Add Customer" to create your first one',
+                'Tap "Add Supplier" to create your first one',
                 style: TextStyle(color: AppColors.textSecondary, fontSize: 13),
                 textAlign: TextAlign.center,
               ),
@@ -162,19 +160,24 @@ class _CustomerListScreenState extends State<CustomerListScreen> {
   }
 }
 
-class _CustomerTile extends StatelessWidget {
-  final Customer customer;
+class _SupplierTile extends StatelessWidget {
+  final Supplier supplier;
   final VoidCallback onTap;
   final VoidCallback onDelete;
 
-  const _CustomerTile({
-    required this.customer,
+  const _SupplierTile({
+    required this.supplier,
     required this.onTap,
     required this.onDelete,
   });
 
   @override
   Widget build(BuildContext context) {
+    final subtitleParts = [
+      if (supplier.contactPerson.isNotEmpty) supplier.contactPerson,
+      if (supplier.phone.isNotEmpty) supplier.phone,
+    ];
+
     return Container(
       decoration: BoxDecoration(
         color: AppColors.surface,
@@ -186,21 +189,20 @@ class _CustomerTile extends StatelessWidget {
         onTap: onTap,
         leading: CircleAvatar(
           radius: 22,
-          backgroundColor: AppColors.primary.withValues(alpha: 0.12),
+          backgroundColor: AppColors.accent.withValues(alpha: 0.14),
           child: Text(
-            customer.initial,
-            style: const TextStyle(
-              color: AppColors.primary,
-              fontWeight: FontWeight.bold,
-            ),
+            supplier.initial,
+            style: const TextStyle(color: AppColors.accent, fontWeight: FontWeight.bold),
           ),
         ),
         title: Text(
-          customer.name,
+          supplier.name,
           style: const TextStyle(fontWeight: FontWeight.w600),
         ),
-        subtitle: Text(
-          [customer.phone, customer.email].where((s) => s.isNotEmpty).join(' • '),
+        subtitle: subtitleParts.isEmpty
+            ? null
+            : Text(
+          subtitleParts.join(' • '),
           maxLines: 1,
           overflow: TextOverflow.ellipsis,
         ),
