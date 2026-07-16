@@ -1,10 +1,15 @@
 import 'package:flutter/material.dart';
 import 'package:ma/screens/supplier/supplier_list_screen.dart';
 import '../services/customer_service.dart';
+import '../services/order_service.dart';
+import '../services/product_service.dart';
 import '../theme/app_theme.dart';
 import 'category/category_list_screen.dart';
 import 'customer/customer_list_screen.dart';
 import 'login_screen.dart';
+import 'order/new_order_screen.dart';
+import 'order/order_list_screen.dart';
+import 'product/product_list_screen.dart';
 
 class HomeScreen extends StatefulWidget {
   const HomeScreen({super.key});
@@ -39,6 +44,29 @@ class _HomeScreenState extends State<HomeScreen> {
   Future<void> _openSuppliers() async {
     await Navigator.of(context).push(
       MaterialPageRoute(builder: (_) => const SupplierListScreen()),
+    );
+    if (mounted) setState(() {});
+  }
+
+  Future<void> _openProducts() async {
+    await Navigator.of(context).push(
+      MaterialPageRoute(builder: (_) => const ProductListScreen()),
+    );
+    // Refresh stats (product count, low-stock count) after returning.
+    if (mounted) setState(() {});
+  }
+
+  Future<void> _openNewSale() async {
+    await Navigator.of(context).push(
+      MaterialPageRoute(builder: (_) => const NewOrderScreen()),
+    );
+    // Refresh stats (today's sales/orders, stock levels) after returning.
+    if (mounted) setState(() {});
+  }
+
+  Future<void> _openOrders() async {
+    await Navigator.of(context).push(
+      MaterialPageRoute(builder: (_) => const OrderListScreen()),
     );
     if (mounted) setState(() {});
   }
@@ -96,7 +124,7 @@ class _HomeScreenState extends State<HomeScreen> {
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
           Text(
-            'Welcome back',
+            'Welcome back 👋',
             style: TextStyle(
               color: Colors.white,
               fontSize: 14,
@@ -117,15 +145,40 @@ class _HomeScreenState extends State<HomeScreen> {
   }
 
   Widget _buildStatsGrid(BuildContext context) {
+    final productService = ProductService.instance;
+    final orderService = OrderService.instance;
+    final lowStockCount = productService.lowStockCount;
+
     final stats = [
-      _StatItem('Today\'s Sales', 'Rs. 0.00', Icons.trending_up, AppColors.accent),
-      _StatItem('Orders', '0', Icons.receipt_long, AppColors.primary),
-      _StatItem('Products', '0', Icons.inventory_2_outlined, Colors.orange),
+      _StatItem(
+        'Today\'s Sales',
+        'Rs. ${orderService.todaysSalesTotal.toStringAsFixed(2)}',
+        Icons.trending_up,
+        AppColors.accent,
+      ),
+      _StatItem(
+        'Orders',
+        '${orderService.todaysOrderCount}',
+        Icons.receipt_long,
+        AppColors.primary,
+      ),
+      _StatItem(
+        'Products',
+        '${productService.products.length}',
+        Icons.inventory_2_outlined,
+        Colors.orange,
+      ),
       _StatItem(
         'Customers',
         '${CustomerService.instance.customers.length}',
         Icons.people_outline,
         Colors.purple,
+      ),
+      _StatItem(
+        'Low Stock',
+        '$lowStockCount',
+        Icons.warning_amber_rounded,
+        lowStockCount > 0 ? AppColors.warning : AppColors.textSecondary,
       ),
     ];
 
@@ -146,45 +199,64 @@ class _HomeScreenState extends State<HomeScreen> {
       ),
       itemBuilder: (context, index) {
         final stat = stats[index];
-        return Container(
-          padding: const EdgeInsets.all(16),
-          decoration: BoxDecoration(
-            color: AppColors.surface,
-            borderRadius: BorderRadius.circular(14),
-            border: Border.all(color: AppColors.border),
-          ),
-          child: Column(
-            crossAxisAlignment: CrossAxisAlignment.start,
-            mainAxisAlignment: MainAxisAlignment.spaceBetween,
-            children: [
-              Container(
-                padding: const EdgeInsets.all(8),
-                decoration: BoxDecoration(
-                  color: stat.color.withValues(alpha: 0.12),
-                  borderRadius: BorderRadius.circular(10),
-                ),
-                child: Icon(stat.icon, color: stat.color, size: 20),
+        final isLowStockCard = stat.label == 'Low Stock' && lowStockCount > 0;
+        VoidCallback? onTap;
+        switch (stat.label) {
+          case 'Products':
+            onTap = _openProducts;
+            break;
+          case 'Low Stock':
+            if (isLowStockCard) onTap = _openProducts;
+            break;
+          case 'Today\'s Sales':
+          case 'Orders':
+            onTap = _openOrders;
+            break;
+        }
+        return GestureDetector(
+          onTap: onTap,
+          child: Container(
+            padding: const EdgeInsets.all(16),
+            decoration: BoxDecoration(
+              color: isLowStockCard ? AppColors.warning.withValues(alpha: 0.06) : AppColors.surface,
+              borderRadius: BorderRadius.circular(14),
+              border: Border.all(
+                color: isLowStockCard ? AppColors.warning.withValues(alpha: 0.4) : AppColors.border,
               ),
-              Text(
-                stat.value,
-                maxLines: 1,
-                overflow: TextOverflow.ellipsis,
-                style: const TextStyle(
-                  fontSize: 18,
-                  fontWeight: FontWeight.bold,
-                  color: AppColors.textPrimary,
+            ),
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              mainAxisAlignment: MainAxisAlignment.spaceBetween,
+              children: [
+                Container(
+                  padding: const EdgeInsets.all(8),
+                  decoration: BoxDecoration(
+                    color: stat.color.withValues(alpha: 0.12),
+                    borderRadius: BorderRadius.circular(10),
+                  ),
+                  child: Icon(stat.icon, color: stat.color, size: 20),
                 ),
-              ),
-              Text(
-                stat.label,
-                maxLines: 1,
-                overflow: TextOverflow.ellipsis,
-                style: const TextStyle(
-                  fontSize: 12,
-                  color: AppColors.textSecondary,
+                Text(
+                  stat.value,
+                  maxLines: 1,
+                  overflow: TextOverflow.ellipsis,
+                  style: const TextStyle(
+                    fontSize: 18,
+                    fontWeight: FontWeight.bold,
+                    color: AppColors.textPrimary,
+                  ),
                 ),
-              ),
-            ],
+                Text(
+                  stat.label,
+                  maxLines: 1,
+                  overflow: TextOverflow.ellipsis,
+                  style: const TextStyle(
+                    fontSize: 12,
+                    color: AppColors.textSecondary,
+                  ),
+                ),
+              ],
+            ),
           ),
         );
       },
@@ -193,8 +265,8 @@ class _HomeScreenState extends State<HomeScreen> {
 
   Widget _buildQuickActions(BuildContext context) {
     final actions = [
-      _ActionItem('New Sale', Icons.point_of_sale_rounded, AppColors.primary, null),
-      _ActionItem('Products', Icons.inventory_2_outlined, Colors.orange, null),
+      _ActionItem('New Sale', Icons.point_of_sale_rounded, AppColors.primary, _openNewSale),
+      _ActionItem('Products', Icons.inventory_2_outlined, Colors.orange, _openProducts),
       _ActionItem('Customers', Icons.people_outline, Colors.purple, _openCustomers),
       _ActionItem('Categories', Icons.category_outlined, Colors.teal, _openCategories),
       _ActionItem('Suppliers', Icons.local_shipping_outlined, AppColors.accent, _openSuppliers),
