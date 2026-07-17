@@ -10,6 +10,7 @@ import 'login_screen.dart';
 import 'order/new_order_screen.dart';
 import 'order/order_list_screen.dart';
 import 'product/product_list_screen.dart';
+import 'reports/reports_screen.dart';
 
 class HomeScreen extends StatefulWidget {
   const HomeScreen({super.key});
@@ -71,6 +72,13 @@ class _HomeScreenState extends State<HomeScreen> {
     if (mounted) setState(() {});
   }
 
+  Future<void> _openReports() async {
+    await Navigator.of(context).push(
+      MaterialPageRoute(builder: (_) => const ReportsScreen()),
+    );
+    if (mounted) setState(() {});
+  }
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -124,7 +132,7 @@ class _HomeScreenState extends State<HomeScreen> {
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
           Text(
-            'Welcome back 👋',
+            'Welcome back',
             style: TextStyle(
               color: Colors.white,
               fontSize: 14,
@@ -270,7 +278,7 @@ class _HomeScreenState extends State<HomeScreen> {
       _ActionItem('Customers', Icons.people_outline, Colors.purple, _openCustomers),
       _ActionItem('Categories', Icons.category_outlined, Colors.teal, _openCategories),
       _ActionItem('Suppliers', Icons.local_shipping_outlined, AppColors.accent, _openSuppliers),
-      _ActionItem('Reports', Icons.bar_chart_rounded, Colors.indigo, null),
+      _ActionItem('Reports', Icons.bar_chart_rounded, Colors.indigo, _openReports),
     ];
 
     return GridView.builder(
