@@ -1,7 +1,8 @@
 import 'package:flutter/material.dart';
-import '/../models/supplier.dart';
-import '/../services/supplier_service.dart';
-import '/../theme/app_theme.dart';
+import '../../models/supplier.dart';
+import '../../services/supplier_service.dart';
+import '../../theme/app_theme.dart';
+import '../../widgets/app_drawer.dart';
 import 'supplier_form_screen.dart';
 
 class SupplierListScreen extends StatefulWidget {
@@ -72,6 +73,7 @@ class _SupplierListScreenState extends State<SupplierListScreen> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
+      drawer: const AppDrawer(currentRoute: AppDrawer.suppliers),
       appBar: AppBar(
         title: const Text('Suppliers'),
       ),

@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import '../../models/customer.dart';
 import '../../services/customer_service.dart';
 import '../../theme/app_theme.dart';
+import '../../widgets/app_drawer.dart';
 import 'customer_form_screen.dart';
 
 class CustomerListScreen extends StatefulWidget {
@@ -74,6 +75,7 @@ class _CustomerListScreenState extends State<CustomerListScreen> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
+      drawer: const AppDrawer(currentRoute: AppDrawer.customers),
       appBar: AppBar(
         title: const Text('Customers'),
       ),

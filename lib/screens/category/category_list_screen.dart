@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import '../../models/category.dart';
 import '../../services/category_service.dart';
 import '../../theme/app_theme.dart';
+import '../../widgets/app_drawer.dart';
 import 'category_form_screen.dart';
 
 class CategoryListScreen extends StatefulWidget {
@@ -72,6 +73,7 @@ class _CategoryListScreenState extends State<CategoryListScreen> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
+      drawer: const AppDrawer(currentRoute: AppDrawer.categories),
       appBar: AppBar(
         title: const Text('Categories'),
       ),

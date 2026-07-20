@@ -75,6 +75,7 @@ class ProductService extends ChangeNotifier {
     required int stockQty,
     int lowStockThreshold = 5,
     String description = '',
+    String? imagePath,
   }) {
     final product = Product(
       id: _generateId(),
@@ -86,6 +87,7 @@ class ProductService extends ChangeNotifier {
       stockQty: stockQty,
       lowStockThreshold: lowStockThreshold,
       description: description.trim(),
+      imagePath: imagePath,
     );
     _products.insert(0, product);
     notifyListeners();
@@ -145,6 +147,8 @@ class ProductService extends ChangeNotifier {
         required int stockQty,
         required int lowStockThreshold,
         required String description,
+        String? imagePath,
+        bool clearImage = false,
       }) {
     final index = _products.indexWhere((p) => p.id == id);
     if (index == -1) return false;
@@ -158,6 +162,8 @@ class ProductService extends ChangeNotifier {
       stockQty: stockQty,
       lowStockThreshold: lowStockThreshold,
       description: description.trim(),
+      imagePath: imagePath,
+      clearImage: clearImage,
     );
     notifyListeners();
     return true;

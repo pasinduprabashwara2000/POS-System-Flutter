@@ -5,6 +5,7 @@ import '../../services/category_service.dart';
 import '../../services/order_service.dart';
 import '../../services/product_service.dart';
 import '../../theme/app_theme.dart';
+import '../../widgets/app_drawer.dart';
 import '../product/product_list_screen.dart';
 
 enum _ReportPeriod { today, week, month, all }
@@ -52,6 +53,7 @@ class _ReportsScreenState extends State<ReportsScreen> {
     final lowStock = ProductService.instance.lowStockProducts;
 
     return Scaffold(
+      drawer: const AppDrawer(currentRoute: AppDrawer.reports),
       appBar: AppBar(title: const Text('Reports')),
       body: SafeArea(
         child: ListView(

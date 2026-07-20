@@ -9,6 +9,7 @@ class Product {
   int stockQty;
   int lowStockThreshold;
   String description;
+  String? imagePath;
   DateTime createdAt;
 
   Product({
@@ -21,6 +22,7 @@ class Product {
     required this.stockQty,
     this.lowStockThreshold = 5,
     this.description = '',
+    this.imagePath,
     DateTime? createdAt,
   }) : createdAt = createdAt ?? DateTime.now();
 
@@ -41,6 +43,8 @@ class Product {
     int? stockQty,
     int? lowStockThreshold,
     String? description,
+    String? imagePath,
+    bool clearImage = false,
   }) {
     return Product(
       id: id,
@@ -52,6 +56,7 @@ class Product {
       stockQty: stockQty ?? this.stockQty,
       lowStockThreshold: lowStockThreshold ?? this.lowStockThreshold,
       description: description ?? this.description,
+      imagePath: clearImage ? null : (imagePath ?? this.imagePath),
       createdAt: createdAt,
     );
   }

@@ -1,7 +1,8 @@
 import 'package:flutter/material.dart';
-import '../../../models/order.dart';
-import '../../../services/order_service.dart';
-import '../../../theme/app_theme.dart';
+import '../../models/order.dart';
+import '../../services/order_service.dart';
+import '../../theme/app_theme.dart';
+import '../../widgets/app_drawer.dart';
 import 'new_order_screen.dart';
 import 'order_detail_screen.dart';
 
@@ -61,6 +62,7 @@ class _OrderListScreenState extends State<OrderListScreen> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
+      drawer: const AppDrawer(currentRoute: AppDrawer.orders),
       appBar: AppBar(
         title: const Text('Orders'),
       ),

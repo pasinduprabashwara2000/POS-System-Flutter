@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
-import '/../models/supplier.dart';
-import '/../services/supplier_service.dart';
-import '/../theme/app_theme.dart';
+import '../../models/supplier.dart';
+import '../../services/supplier_service.dart';
+import '../../theme/app_theme.dart';
 
 /// Single form used for both creating a new supplier and editing an
 /// existing one. Pass [supplier] to edit; leave it null to create.

@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
-import '/../models/category.dart';
-import '/../services/category_service.dart';
-import '/../theme/app_theme.dart';
+import '../../models/category.dart';
+import '../../services/category_service.dart';
+import '../../theme/app_theme.dart';
 
 /// Single form used for both creating a new category and editing an
 /// existing one. Pass [category] to edit; leave it null to create.

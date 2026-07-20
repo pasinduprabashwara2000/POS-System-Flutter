@@ -1,5 +1,5 @@
 import 'package:flutter/material.dart';
-import 'package:ma/screens/supplier/supplier_list_screen.dart';
+import 'package:ma2/screens/supplier/supplier_list_screen.dart';
 import '../services/customer_service.dart';
 import '../services/order_service.dart';
 import '../services/product_service.dart';
@@ -11,6 +11,7 @@ import 'order/new_order_screen.dart';
 import 'order/order_list_screen.dart';
 import 'product/product_list_screen.dart';
 import 'reports/reports_screen.dart';
+import '../widgets/app_drawer.dart';
 
 class HomeScreen extends StatefulWidget {
   const HomeScreen({super.key});
@@ -82,6 +83,7 @@ class _HomeScreenState extends State<HomeScreen> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
+      drawer: const AppDrawer(currentRoute: AppDrawer.dashboard),
       appBar: AppBar(
         title: const Text(
           'Dashboard',

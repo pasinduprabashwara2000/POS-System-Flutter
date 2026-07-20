@@ -1,4 +1,7 @@
+import 'dart:io';
+
 import 'package:flutter/material.dart';
+import 'package:image_picker/image_picker.dart';
 import '../../models/product.dart';
 import '../../services/category_service.dart';
 import '../../services/product_service.dart';
@@ -29,7 +32,9 @@ class _ProductFormScreenState extends State<ProductFormScreen> {
 
   String? _categoryId;
   String? _supplierId;
+  String? _imagePath; // local file path of the picked/existing product photo
   bool _isSaving = false;
+  bool _isPickingImage = false;
 
   @override
   void initState() {
@@ -44,6 +49,7 @@ class _ProductFormScreenState extends State<ProductFormScreen> {
     _descriptionController = TextEditingController(text: p?.description ?? '');
     _categoryId = p?.categoryId;
     _supplierId = p?.supplierId;
+    _imagePath = p?.imagePath;
   }
 
   @override
@@ -55,6 +61,84 @@ class _ProductFormScreenState extends State<ProductFormScreen> {
     _thresholdController.dispose();
     _descriptionController.dispose();
     super.dispose();
+  }
+
+  Future<void> _pickImage(ImageSource source) async {
+    setState(() => _isPickingImage = true);
+    try {
+      final picker = ImagePicker();
+      final XFile? picked = await picker.pickImage(
+        source: source,
+        maxWidth: 1600,
+        imageQuality: 85,
+      );
+      if (picked != null && mounted) {
+        setState(() => _imagePath = picked.path);
+      }
+    } catch (e) {
+      if (mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(content: Text('Could not access image source: $e')),
+        );
+      }
+    } finally {
+      if (mounted) setState(() => _isPickingImage = false);
+    }
+  }
+
+  void _showImageSourceSheet() {
+    showModalBottomSheet(
+      context: context,
+      backgroundColor: AppColors.surface,
+      shape: const RoundedRectangleBorder(
+        borderRadius: BorderRadius.vertical(top: Radius.circular(20)),
+      ),
+      builder: (sheetContext) {
+        return SafeArea(
+          child: Column(
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              const SizedBox(height: 8),
+              Container(
+                width: 40,
+                height: 4,
+                decoration: BoxDecoration(
+                  color: AppColors.border,
+                  borderRadius: BorderRadius.circular(2),
+                ),
+              ),
+              const SizedBox(height: 12),
+              ListTile(
+                leading: const Icon(Icons.photo_camera_outlined, color: AppColors.primary),
+                title: const Text('Take Photo'),
+                onTap: () {
+                  Navigator.of(sheetContext).pop();
+                  _pickImage(ImageSource.camera);
+                },
+              ),
+              ListTile(
+                leading: const Icon(Icons.photo_library_outlined, color: AppColors.primary),
+                title: const Text('Choose from Gallery'),
+                onTap: () {
+                  Navigator.of(sheetContext).pop();
+                  _pickImage(ImageSource.gallery);
+                },
+              ),
+              if (_imagePath != null)
+                ListTile(
+                  leading: const Icon(Icons.delete_outline, color: AppColors.error),
+                  title: const Text('Remove Photo', style: TextStyle(color: AppColors.error)),
+                  onTap: () {
+                    Navigator.of(sheetContext).pop();
+                    setState(() => _imagePath = null);
+                  },
+                ),
+              const SizedBox(height: 8),
+            ],
+          ),
+        );
+      },
+    );
   }
 
   void _save() {
@@ -84,6 +168,8 @@ class _ProductFormScreenState extends State<ProductFormScreen> {
         stockQty: stockQty,
         lowStockThreshold: threshold,
         description: _descriptionController.text,
+        imagePath: _imagePath,
+        clearImage: _imagePath == null,
       );
     } else {
       service.addProduct(
@@ -95,6 +181,7 @@ class _ProductFormScreenState extends State<ProductFormScreen> {
         stockQty: stockQty,
         lowStockThreshold: threshold,
         description: _descriptionController.text,
+        imagePath: _imagePath,
       );
     }
 
@@ -118,6 +205,8 @@ class _ProductFormScreenState extends State<ProductFormScreen> {
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.stretch,
               children: [
+                _buildImagePicker(),
+                const SizedBox(height: 20),
                 TextFormField(
                   controller: _nameController,
                   textCapitalization: TextCapitalization.words,
@@ -291,6 +380,78 @@ class _ProductFormScreenState extends State<ProductFormScreen> {
               ],
             ),
           ),
+        ),
+      ),
+    );
+  }
+
+  Widget _buildImagePicker() {
+    return Center(
+      child: GestureDetector(
+        onTap: _isPickingImage ? null : _showImageSourceSheet,
+        child: Stack(
+          clipBehavior: Clip.none,
+          children: [
+            Container(
+              width: 140,
+              height: 140,
+              decoration: BoxDecoration(
+                color: AppColors.surfaceVariant,
+                borderRadius: BorderRadius.circular(18),
+                border: Border.all(color: AppColors.border, width: 1.4),
+              ),
+              clipBehavior: Clip.antiAlias,
+              child: _isPickingImage
+                  ? const Center(
+                child: CircularProgressIndicator(strokeWidth: 2.4),
+              )
+                  : (_imagePath != null
+                  ? Image.file(
+                File(_imagePath!),
+                fit: BoxFit.cover,
+                errorBuilder: (context, error, stackTrace) => const Center(
+                  child: Icon(
+                    Icons.broken_image_outlined,
+                    size: 36,
+                    color: AppColors.textSecondary,
+                  ),
+                ),
+              )
+                  : const Center(
+                child: Column(
+                  mainAxisSize: MainAxisSize.min,
+                  children: [
+                    Icon(
+                      Icons.add_a_photo_outlined,
+                      size: 30,
+                      color: AppColors.textSecondary,
+                    ),
+                    SizedBox(height: 6),
+                    Text(
+                      'Add Photo',
+                      style: TextStyle(fontSize: 12, color: AppColors.textSecondary),
+                    ),
+                  ],
+                ),
+              )),
+            ),
+            if (_imagePath != null)
+              Positioned(
+                right: -8,
+                top: -8,
+                child: GestureDetector(
+                  onTap: () => setState(() => _imagePath = null),
+                  child: Container(
+                    padding: const EdgeInsets.all(4),
+                    decoration: const BoxDecoration(
+                      color: AppColors.error,
+                      shape: BoxShape.circle,
+                    ),
+                    child: const Icon(Icons.close, size: 16, color: Colors.white),
+                  ),
+                ),
+              ),
+          ],
         ),
       ),
     );
