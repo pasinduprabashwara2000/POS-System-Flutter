@@ -1,17 +1,5 @@
-# ma
+<img width="355" height="689" alt="Screenshot from 2026-07-21 12-22-24" src="https://github.com/user-attachments/assets/95cf70af-6ed1-471f-a1fb-52b59c6a3502" />
+<img width="355" height="689" alt="Screenshot from 2026-07-21 13-35-30-1" src="https://github.com/user-attachments/assets/c17665e1-ad8c-4776-9812-6e890ef816f3" />
+<img width="355" height="689" alt="Screenshot from 2026-07-21 14-00-08" src="https://github.com/user-attachments/assets/fa8746cf-86a8-4b37-a899-c3dec576344d" />
 
-A new Flutter project.
 
-## Getting Started
-
-This project is a starting point for a Flutter application.
-
-A few resources to get you started if this is your first Flutter project:
-
-- [Learn Flutter](https://docs.flutter.dev/get-started/learn-flutter)
-- [Write your first Flutter app](https://docs.flutter.dev/get-started/codelab)
-- [Flutter learning resources](https://docs.flutter.dev/reference/learning-resources)
-
-For help getting started with Flutter development, view the
-[online documentation](https://docs.flutter.dev/), which offers tutorials,
-samples, guidance on mobile development, and a full API reference.
